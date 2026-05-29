@@ -1,0 +1,35 @@
+library(pheatmap)
+library(RColorBrewer)
+log_expr_tpm_PFA2.mx <- log2(assay(dds_PFA2_filtered,"abundance") + 1) 
+
+head(log_expr_tpm_PFA2.mx) 
+
+log_fc_cutoff <- 10
+
+adj_p_cutoff <- 1e-5
+
+top_genes_PFA2.df <- extracted_result_PFA2.df %>% filter(abs(log2FoldChange) > log_fc_cutoff, padj < adj_p_cutoff)
+
+dim(top_genes_PFA2.df) #34  6
+top_genes_PFA2.df %>% arrange(padj) %>%  head(n=10)
+top_genes_exprs_PFA2.mx <- log_expr_tpm_PFA2.mx[top_genes_PFA2.df$gene_id, ]
+head(top_genes_exprs_PFA2.mx)
+rownames(top_genes_exprs_PFA2.mx) <- top_genes_PFA2.df$gene_name
+
+rownames(top_genes_PFA2.df) <- top_genes_PFA2.df$gene_name
+
+gbr_99 <- colorRampPalette(c("green", "black", "red"))(n = 99)
+blrd <- colorRampPalette(c("blue", "white", "red"))(n = 99)
+
+cases_PFA2.df <- as.data.frame(colData(dds_PFA2_filtered))
+cases_PFA2.df <- cases_PFA2.df %>% dplyr::select(condition)
+num_genes_PFA2 <- nrow(top_genes_PFA2.df)
+pheatmap(
+  mat = top_genes_exprs_PFA2.mx, 
+  color=blrd, 
+  scale = "row", 
+  annotation_col = cases_PFA2.df, 
+  border_color = NA, 
+  main = main_PFA2)
+
+main_PFA2 <- paste(num_genes_PFA2, "genes with log2(FC) >", log_fc_cutoff, "and adj.P <", adj_p_cutoff, "\n")
