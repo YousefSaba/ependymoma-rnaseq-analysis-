@@ -24,3 +24,9 @@ Environment: R Studio
 Core Libraries & Frameworks: Bioconductor (DESeq2 / EdgeR), ggplot2, pheatmap, ClusterProfiler (or any specific packages you used)
 
 Domain Exposure: Next-Generation Sequencing (NGS) workflows (inspired by practical training at Illumina, Berlin).
+......................................................................................................................................
+
+👥 Code Development & Attribution
+Base Framework: The core algorithmic architecture and initial code framework were developed by Dr. Salma Mahmoud.
+
+Adaptation & Implementation: I adapted, refactored, and extended this codebase specifically to fit the parameters of this ependymoma transcriptomics project. My contribution involved handling the specific dataset integration, optimizing the pipeline for our targeted differential expression analysis, and generating the downstream data visualizations.
