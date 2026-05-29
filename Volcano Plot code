@@ -1,0 +1,15 @@
+if (!requireNamespace('BiocManager', quietly = TRUE))
+  install.packages('BiocManager')
+
+BiocManager::install('EnhancedVolcano')
+
+library(ggrepel)
+library(EnhancedVolcano)
+EnhancedVolcano(extracted_result_PFA2.df,
+                lab = extracted_result_PFA2.df$gene_name,
+                x = "log2FoldChange",
+                y = "padj", 
+                title="DESeq2 results of PFA2 vs Normal",
+                subtitle="Enhanced Volcano Plot")
+
+  
