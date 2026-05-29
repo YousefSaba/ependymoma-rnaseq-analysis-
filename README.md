@@ -1,8 +1,6 @@
 # ependymoma-rnaseq-analysis-
 My Graduation project in GUC\GIU Berlin 2026 
 .................................................
-Here is a clean, compelling, and professional intro you can use for your GitHub repository's README.md file. It is structured to instantly show recruiters your technical skills, the clinical relevance of your work, and your data science workflow.
-
 🧬 End-to-End RNA-Seq Analysis Pipeline: Ependymoma Transcriptomics
 📌 Project Overview
 This repository contains an end-to-end bioinformatics pipeline developed for my graduation project at the German University in Cairo (GUC). The project focuses on the differential gene expression analysis of ependymoma tumor transcriptomes compared against healthy brain tissue control data.
