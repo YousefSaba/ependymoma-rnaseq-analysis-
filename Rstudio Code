@@ -1,0 +1,89 @@
+library(tximeta)
+setwd()
+coldata_RELA<- read.table("samples_RELA.txt", header=T, sep = "\t")
+coldata_PFA2 <- read.table("samples_PFA2.txt", header=T, sep = "\t")
+
+file.exists(coldata_RELA$files)
+file.exists(coldata_PFA2$files)
+
+coldata_RELA 
+coldata_PFA2 
+
+se_PFA2 <- tximeta(coldata_PFA2) 
+
+se_PFA2
+
+library(SummarizedExperiment)
+seqinfo(se_PFA2) 
+colData(se_PFA2) 
+assayNames(se_PFA2) 
+rowRanges(se_PFA2) 
+gse_PFA2 <- summarizeToGene(se_PFA2, assignRanges="abundant")
+gse_PFA2
+rowRanges(gse_PFA2)
+
+library(org.Hs.eg.db)
+org.Hs.eg.db
+gse_PFA2 <- addIds(gse_PFA2, "SYMBOL", gene=TRUE)
+rowRanges(gse_PFA2)
+sum(is.na(rowRanges(gse_PFA2)$SYMBOL)) #25988
+length(rowRanges(gse_PFA2)) # 62749 
+length(rowRanges(gse_PFA2)) 
+
+library(rtracklayer)
+gtf.df <- readGFF("gencode.v45.primary_assembly.annotation.gtf.gz")
+head(gtf.df)
+
+library(dplyr) 
+geneId2Name.df <- gtf.df %>% dplyr::select(gene_id,gene_name,gene_type) %>% distinct()
+head(geneId2Name.df)
+tail(geneId2Name.df)
+rownames(geneId2Name.df) <- geneId2Name.df$gene_id 
+head(geneId2Name.df)
+
+geneId2Name.df <- geneId2Name.df[rownames(gse_PFA2),]
+
+head(geneId2Name.df)
+
+rowRanges(gse_PFA2)$gene_name <- geneId2Name.df$gene_name 
+rowRanges(gse_PFA2)$gene_type <- geneId2Name.df$gene_type
+rowRanges(gse_PFA2)
+
+library(DESeq2)
+dds_PFA2 <- DESeqDataSet(gse_PFA2, design = ~ condition) 
+dds_PFA2
+vst_PFA2 <- varianceStabilizingTransformation(dds_PFA2)
+plotPCA(vst_PFA2,intgroup = "condition", returnData = TRUE) # check the data to know the outliers 
+dds_PFA2_filtered <- DESeq(dds_PFA2_filtered)
+dds_PFA2_filtered
+FDR_0.05_2x_change_PFA2 <- results(dds_PFA2_filtered, lfcThreshold=1, alpha=0.05)
+summary(FDR_0.05_2x_change_PFA2)
+FDR_0.05_2x_change_PFA2
+result_PFA2.df <- as.data.frame(FDR_0.05_2x_change_PFA2) 
+dim(result_PFA2.df) 
+head(result_PFA2.df)
+tail(result_PFA2.df)
+gene_names_PFA2.df <- as.data.frame(rowData(dds_PFA2_filtered)[,c("gene_id","SYMBOL","gene_name","gene_type")]) 
+
+dim(gene_names_PFA2.df)
+head(gene_names_PFA2.df)
+tail(gene_names_PFA2.df)
+all(rownames(gene_names_PFA2.df) == rownames(result_PFA2.df))  #[1] TRUE
+
+allresult_PFA2.df <- data.frame(gene_names_PFA2.df,result_PFA2.df)
+dim(allresult_PFA2.df)
+head(allresult_PFA2.df)
+tail(allresult_PFA2.df) 
+excluded_genes_PFA2 <- is.na(allresult_PFA2.df$padj) 
+sum(excluded_genes_PFA2)
+allresult_PFA2.df <- allresult_PFA2.df[!excluded_genes_PFA2,] 
+dim(allresult_PFA2.df) #[1] 27641    10
+extracted_result_PFA2.df <- allresult_PFA2.df %>% 
+  dplyr::select(gene_id, gene_name, gene_type, baseMean, log2FoldChange,  padj) %>%
+  arrange(padj, desc(log2FoldChange))
+dim(extracted_result_PFA2.df) #[1] 27641     6
+head(extracted_result_PFA2.df)
+tail(extracted_result_PFA2.df)
+write.table(extracted_result_PFA2.df, file="DESeq2_FDR_0.05_2x_genes_PFA2.txt", quote=FALSE, sep="\t", row.names = FALSE, col.names = TRUE)
+
+
